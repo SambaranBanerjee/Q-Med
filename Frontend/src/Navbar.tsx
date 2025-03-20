@@ -20,7 +20,7 @@ const NavBar = () => {
         <nav className='sticky bg-white p-4'>
             <div className="container mx-auto flex justify-between items-center z-10">
                 <button className="text-gray-300 hover:text-black active:green-500"><a href='Entry.html'>Home</a></button>
-                <button className="text-gray-300 hover:text-black active:green-500"><a href='#Exercise.html'>Ask Questions</a></button>
+                <button className="text-gray-300 hover:text-black active:green-500"><a href='Questions.html'>Ask Questions</a></button>
                 <button className="text-gray-300 hover:text-black active:green-500"><a href='#About.html'>Search Doctors</a></button>
                 <div className='relative'>
                     <button id="profile" className="text-gray-300 hover:text-black" onClick={()=>{setProfileDropdownVisible(!isProfileDropdownVisible)}}>Profile</button>
