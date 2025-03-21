@@ -33,7 +33,7 @@ const NavBar = () => {
             Ask Questions
           </a>
           <a
-            href="#About.html"
+            href="SearchPage.html"
             className="text-gray-700 hover:text-red-500 transition-colors duration-200 font-medium"
           >
             Search Doctors
