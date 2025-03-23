@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "target": "ES6",
+      "module": "commonjs",
+      "baseUrl": ".",
+      "paths": {
+        "*": ["src/*"]
+      },
+      "checkJs": true, // Enable type checking for JavaScript files
+      "allowJs": true // Allow JavaScript files to be compiled
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules"]
+  }

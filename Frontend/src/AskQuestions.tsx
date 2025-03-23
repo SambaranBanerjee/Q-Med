@@ -1,32 +1,58 @@
 import NavBar from './Navbar';
 import Question from './Questions';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function QuestionsPage() {
   const [submittedQuestions, setSubmittedQuestions] = useState<string[]>([]);
-  const [otherUsersQuestions, setOtherUsersQuestions] = useState<string[]>([]);
+  const [otherUsersQuestions, setOtherUsersQuestions] = useState<{ question: string }[]>([]);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
 
-  //This will eventually contain the questions provided by other users
+  // Fetch questions from the backend
   useEffect(() => {
-    const fetchOtherUsersQuestions = async () => {
-      //We will make an API request to fetch the questions
-      const mockQuestions = [
-        "What is Malaria?",
-        "How does penicillium work?",
-        "Can you explain what is ECG?",
-        "What are some fungal diseases?",
-        "","","","","","","","","","","","","",
-      ];
-      setOtherUsersQuestions(mockQuestions);
+    const fetchQuestions = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/questions');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setOtherUsersQuestions(data);
+      } catch (err) {
+        console.error('Error in fetching questions', err);
+      } finally {
+        setIsLoading(false); // Set loading to false after fetching
+      }
     };
 
-    fetchOtherUsersQuestions();
+    fetchQuestions();
   }, []);
 
-  const handleQuestionSubmit = (question: string) => {
-    setSubmittedQuestions([...submittedQuestions, question]);
-    console.log('Question sent to server:', question);
+  const handleQuestionSubmit = async (question: string) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ question }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setOtherUsersQuestions([...otherUsersQuestions, data]);
+      setSubmittedQuestions([...submittedQuestions, question]);
+      alert('Question submitted successfully');
+    } catch (err) {
+      console.error('Error in submitting question', err);
+    }
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Show loading indicator
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-red-400 to-orange-300">
@@ -60,7 +86,7 @@ export default function QuestionsPage() {
               <ul className="space-y-3">
                 {otherUsersQuestions.map((q, index) => (
                   <li key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-gray-700">{q}</p>
+                    <p className="text-gray-700">{q.question}</p>
                   </li>
                 ))}
               </ul>
