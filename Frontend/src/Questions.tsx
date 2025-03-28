@@ -1,19 +1,31 @@
 import React, { useState } from 'react';
 
 interface QuestionProps {
-  onQuestionSubmit: (question: string) => void;
+  onQuestionSubmit: (question: string) => Promise<void>;
 }
 
 export default function Question({ onQuestionSubmit }: QuestionProps) {
   const [question, setQuestion] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (question.trim()) {
-      onQuestionSubmit(question);
-      setQuestion(''); 
+    if (question.trim().length < 3) {
+      setError('Question must be at least 3 characters long');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await onQuestionSubmit(question);
+      setQuestion('');
       console.log('Submitted Question:', question);
-      alert('Submitted Question');
+    } catch (error) {
+      console.error('Error submitting question:', error);
+      setError('Failed to submit question. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -33,11 +45,15 @@ export default function Question({ onQuestionSubmit }: QuestionProps) {
         className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
         rows={4}
       />
+      {error && <p className="text-red-500 text-sm">{error}</p>}
       <button
         type="submit"
-        className="w-full bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 transition duration-300"
+        disabled={isSubmitting}
+        className={`w-full bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 transition duration-300 ${
+          isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
       >
-        Submit
+        {isSubmitting ? 'Submitting...' : 'Submit'}
       </button>
     </form>
   );

@@ -1,27 +1,10 @@
 import express from 'express';
-import Question from '../models/questionModels.js';
+import { getQuestion, createQuestion } from '../controllers/questionController.js';
 
-const router = express.Router();
+const questionRouter = express.Router();
 
-router.get('/questions', async (req, res) => {
-    try {
-        const questions = await Question.find();
-        res.status(200).json(questions);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
-    }
-});
+questionRouter.get('/questions', getQuestion );
 
-router.post('/questions', async (req, res) => {
-    const { question } = req.body;
+questionRouter.post('/questions', createQuestion );
 
-    try {
-        const newQuestion = new Question({ question });
-        const savedQuestion = await newQuestion.save();
-        res.status(201).json(savedQuestion);
-    } catch (error) {
-        res.status(400).json({ message: 'Invalid request' });
-    }
- });
-
-export default router;
+export default questionRouter;

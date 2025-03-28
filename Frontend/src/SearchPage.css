@@ -1,0 +1,45 @@
+/* In your CSS file */
+#r6 {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .search-page {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .search-container {
+    flex: 1;
+    padding: 20px;
+  }
+  
+  /* In your CSS file */
+.doctors-list {
+    border: 2px solid red; /* Temporary debug */
+    padding: 20px;
+  }
+  
+  .doctor-card {
+    border: 1px solid blue;
+    margin: 10px;
+    padding: 15px;
+  }
+  
+  .search-container {
+    background: #f0f0f0; /* Make container visible */
+    min-height: 300px;
+  }
+
+  /* Temporary emergency styles */
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }

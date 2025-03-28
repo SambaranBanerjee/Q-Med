@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Page</title>
-    <script type="module" src="/src/mainForSearchPage.tsx"></script>
-    <link rel="stylesheet" href="SearchPage.css">
+    <!-- Move CSS link before the script -->
+    <link rel="stylesheet" href="/src/SearchPage.css">
 </head>
 <body>
-    <div id="r6">
-        
-    </div>
+    <!-- Add some basic structure -->
+    <div id="r6" class="app-container"></div>
+    <!-- Make sure this script path is correct -->
+    <script type="module" src="/src/mainForSearchPage.tsx"></script>
 </body>
 </html>

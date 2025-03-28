@@ -42,16 +42,17 @@ export default function QuestionsPage() {
       }
 
       const data = await response.json();
-      setOtherUsersQuestions([...otherUsersQuestions, data]);
-      setSubmittedQuestions([...submittedQuestions, question]);
-      alert('Question submitted successfully');
+      setOtherUsersQuestions((prev) => [...prev, data]);
+      setSubmittedQuestions((prev) => [...prev, question]);
+      //alert('Question submitted successfully');
     } catch (err) {
       console.error('Error in submitting question', err);
+      throw err;
     }
   };
 
   if (isLoading) {
-    return <div>Loading...</div>; // Show loading indicator
+    return <div>Loading...</div>; 
   }
 
   return (
