@@ -7,7 +7,7 @@ export default function Footer() {
                 <div className='grid grid-cols-1 sm:grid-cols-3 gap-8'>
                     {/* Company Info */}
                     <div className='text-white'>
-                        <h3 className='text-xl font-bold mb-4'>Company Name</h3>
+                        <h3 className='text-xl font-bold mb-4'>Q-Med</h3>
                         <p className='text-sm mb-2'>Making the world a better place through innovative solutions.</p>
                         <p className='text-sm'>© 2024 Company Name. All rights reserved.</p>
                     </div>

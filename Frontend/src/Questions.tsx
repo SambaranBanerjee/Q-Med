@@ -11,6 +11,13 @@ export default function Question({ onQuestionSubmit }: QuestionProps) {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setError(null);
+    
+    if (!question || question.trim().length === 0) {
+      setError('Question cannot be empty');
+      return;
+    }
+
     if (question.trim().length < 3) {
       setError('Question must be at least 3 characters long');
       return;
@@ -18,8 +25,9 @@ export default function Question({ onQuestionSubmit }: QuestionProps) {
 
     try {
       setIsSubmitting(true);
-      await onQuestionSubmit(question);
+      await onQuestionSubmit(question.trim());
       setQuestion('');
+      setError(null);
       console.log('Submitted Question:', question);
     } catch (error) {
       console.error('Error submitting question:', error);
