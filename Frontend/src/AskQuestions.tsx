@@ -3,7 +3,7 @@ import Question from './Questions';
 import { useState, useEffect } from 'react';
 
 interface Question {
-  q_Id: string;
+  _id: string;  // Only use _id
   question: string;
   createdAt: Date;
   isAnswered: boolean;
@@ -39,10 +39,11 @@ export default function QuestionsPage() {
 
   const handleQuestionSubmit = async (question: string) => {
     try {
-
       if (!question || question.trim().length === 0) {
         throw new Error('Question cannot be empty');
       }
+
+      console.log('Submitting question:', { question: question.trim() });
 
       const response = await fetch('http://localhost:5000/api/questions', {
         method: 'POST',
@@ -56,29 +57,38 @@ export default function QuestionsPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
-        throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        console.error('Server error details:', errorData);
+        throw new Error(
+          `Server Error: ${errorData.message}\nDetails: ${errorData.error || 'No additional details'}`
+        );
       }
 
       const data = await response.json();
+      console.log('Received data from server:', data);
 
-      if (!data.q_Id || !data.question){
+      if (!data.question) {
+        console.error('Invalid data received:', data);
         throw new Error('Invalid question data received from server');
       }
 
       setOtherUsersQuestions((prev) => [...prev, data]);
       setSubmittedQuestions((prev) => [...prev, question]);
-      //alert('Question submitted successfully');
     } catch (err) {
-      console.error('Error in submitting question', err);
+      console.error('Detailed submission error:', err);
       throw new Error(err instanceof Error ? err.message : 'An unknown error occurred');
     }
+    
   };
 
-  const handleUpvote = async (q_Id: string) => {
-    setVotingInProgress(q_Id);
+  const handleUpvote = async (_id: string) => {
+    if (!_id) {
+      throw new Error('Question ID is required');
+    }
+    
+    setVotingInProgress(_id);
     try {
-      const response = await fetch(`http://localhost:5000/api/questions/${q_Id}/vote`, {
+      const response = await fetch(`http://localhost:5000/api/questions/${_id}/vote`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -86,38 +96,45 @@ export default function QuestionsPage() {
         body: JSON.stringify({ action: 'upvote' }),
         credentials: 'omit',
       });
-
+  
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
+        console.error('Server response:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        });
+        throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
       }
       
       const updatedQuestion = await response.json();
+      console.log('Updated question:', updatedQuestion);
       
       setOtherUsersQuestions((prev) =>
         prev.map((q) => 
-          q.q_Id === q_Id ? { 
+          q._id === _id ? { 
             ...q, 
-            upvote: updatedQuestion.upvote,
-            downvote: updatedQuestion.downvote,
-            answers: updatedQuestion.answers,
-            isAnswered: updatedQuestion.isAnswered,
-            createdAt: updatedQuestion.createdAt,
-            q_Id: updatedQuestion.q_Id
-           } : q
+            ...updatedQuestion,
+            _id: updatedQuestion._id
+          } : q
         )
       );
     } catch (err) {
       console.error('Error in upvoting question', err);
-      throw new Error(err instanceof Error ? err.message : 'An unknown error occurred');
+      alert(`Failed to update vote: ${err instanceof Error ? err.message : 'An unknown error occurred'}`);
     } finally {
       setVotingInProgress('');
     }
   }
-
-  const handleDownvote = async (q_Id: string) => {
-    setVotingInProgress(q_Id);
+  
+  const handleDownvote = async (_id: string) => {
+    if (!_id) {
+      throw new Error('Question ID is required');
+    }
+    
+    setVotingInProgress(_id);
     try {
-      const response = await fetch(`http://localhost:5000/api/questions/${q_Id}/vote`, {
+      const response = await fetch(`http://localhost:5000/api/questions/${_id}/vote`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -125,25 +142,32 @@ export default function QuestionsPage() {
         body: JSON.stringify({ action: 'downvote' }),
         credentials: 'omit',
       });
-
+  
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
+        console.error('Server response:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        });
+        throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
       }
-
+  
       const updatedQuestion = await response.json();
+      console.log('Updated question:', updatedQuestion);
       
       setOtherUsersQuestions((prev) =>
         prev.map((q) => 
-          q.q_Id === q_Id ? { 
+          q._id === _id ? { 
             ...q, 
-            upvote: updatedQuestion.upvote,
-            downvote: updatedQuestion.downvote
-           } : q
+            ...updatedQuestion,
+            _id: updatedQuestion._id
+          } : q
         )
       );
     } catch (err) {
       console.error('Error in downvoting question', err);
-      throw new Error(err instanceof Error ? err.message : 'An unknown error occurred');
+      alert(`Failed to update vote: ${err instanceof Error ? err.message : 'An unknown error occurred'}`);
     } finally {
       setVotingInProgress('');
     }
@@ -199,16 +223,16 @@ export default function QuestionsPage() {
                       </span>
                       <div className="flex items-center space-x-2">
                         <button 
-                          onClick={() => handleUpvote(q.q_Id)}
-                          disabled={votingInProgress === q.q_Id}
-                          className={`text-green-600 ${votingInProgress === q.q_Id ? 'opacity-50' : 'hover:text-green-800'}`}
+                          onClick={() => handleUpvote(q._id)}
+                          disabled={votingInProgress === q._id}
+                          className={`text-green-600 ${votingInProgress === q._id ? 'opacity-50' : 'hover:text-green-800'}`}
                         >
                           ↑ {q.upvote}
                         </button>
                         <button 
-                          onClick={() => handleDownvote(q.q_Id)}
-                          disabled={votingInProgress === q.q_Id}
-                          className={`text-red-600 ${votingInProgress === q.q_Id ? 'opacity-50' : 'hover:text-red-800'}`}
+                          onClick={() => handleDownvote(q._id)}
+                          disabled={votingInProgress === q._id}
+                          className={`text-red-600 ${votingInProgress === q._id ? 'opacity-50' : 'hover:text-red-800'}`}
                         >
                           ↓ {q.downvote}
                         </button>

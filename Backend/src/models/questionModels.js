@@ -1,13 +1,10 @@
 import mongoose from "mongoose";
 
 const questionSchema = new mongoose.Schema({
-    q_Id: {
-        type: String,
-        unique: true
-    },
     question: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     createdAt: {
         type: Date,
@@ -23,12 +20,26 @@ const questionSchema = new mongoose.Schema({
     },
     upvote: {
         type: Number,
-        default: 0
+        default: 0,
+        min: 0
     },
     downvote: {
         type: Number,
-        default: 0
-    },
+        default: 0,
+        min: 0
+    }
+}, {
+    // Disable automatic index creation
+    autoIndex: false
+});
+
+// Remove all virtuals and transforms that might interfere
+questionSchema.set('toJSON', {
+    virtuals: false,
+    transform: (doc, ret) => {
+        delete ret.__v;
+        return ret;
+    }
 });
 
 const Question = mongoose.model("Question", questionSchema);
