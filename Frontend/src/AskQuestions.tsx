@@ -19,22 +19,34 @@ export default function QuestionsPage() {
   const [votingInProgress, setVotingInProgress] = useState<string>('');
 
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchAllQuestions = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/questions');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        // Fetch both regular questions and my questions
+        const [questionsResponse, myQuestionsResponse] = await Promise.all([
+          fetch('http://localhost:5000/api/questions'),
+          fetch('http://localhost:5000/api/myQuestions')
+        ]);
+
+        if (!questionsResponse.ok || !myQuestionsResponse.ok) {
+          throw new Error('Failed to fetch questions');
         }
-        const data = await response.json();
-        setOtherUsersQuestions(data);
+
+        const [questionsData, myQuestionsData] = await Promise.all([
+          questionsResponse.json(),
+          myQuestionsResponse.json()
+        ]);
+
+        setOtherUsersQuestions(questionsData);
+        // Set the submitted questions from myQuestionsData
+        setSubmittedQuestions(myQuestionsData.map((q: Question) => q.question));
       } catch (err) {
         console.error('Error in fetching questions', err);
       } finally {
-        setIsLoading(false); // Set loading to false after fetching
+        setIsLoading(false);
       }
     };
 
-    fetchQuestions();
+    fetchAllQuestions();
   }, []);
 
   const handleQuestionSubmit = async (question: string) => {
@@ -55,6 +67,25 @@ export default function QuestionsPage() {
           question: question.trim(),
          }),
       });
+
+      const myResponse = await fetch('http://localhost:5000/api/myQuestions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'omit',
+        body: JSON.stringify({
+          question: question.trim(),
+        }),
+      });
+
+      if (!myResponse.ok) {
+        const errorData = await myResponse.json();
+        console.error('Server error details:', errorData);
+        throw new Error(
+          `Server Error: ${errorData.message}\nDetails: ${errorData.error || 'No additional details'}`
+        );
+      }
 
       if (!response.ok) {
         const errorData = await response.json();
