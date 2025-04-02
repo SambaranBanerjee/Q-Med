@@ -6,6 +6,10 @@ const questionSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    image: {
+        type: String,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

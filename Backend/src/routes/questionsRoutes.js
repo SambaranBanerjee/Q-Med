@@ -1,12 +1,20 @@
 import express from 'express';
-import { getQuestion, createQuestion, voteQuestion } from '../controllers/questionController.js';
+import { 
+  getQuestions, 
+  createQuestion, 
+  voteQuestion,
+  upload 
+} from '../controllers/questionController.js';
 
 const questionRouter = express.Router();
 
-questionRouter.get('/questions', getQuestion );
+// GET all questions
+questionRouter.get('/questions', getQuestions);
 
-questionRouter.post('/questions', createQuestion );
+// POST a new question (with optional image upload)
+questionRouter.post('/questions', upload.single('image'), createQuestion);
 
-questionRouter.put('/questions/:q_Id/vote', voteQuestion);
+// PUT vote on a question
+questionRouter.put('/questions/:questionId/vote', voteQuestion);
 
 export default questionRouter;

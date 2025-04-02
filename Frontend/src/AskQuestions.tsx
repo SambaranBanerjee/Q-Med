@@ -1,27 +1,28 @@
 import NavBar from './Navbar';
-import Question from './Questions';
 import { useState, useEffect } from 'react';
+import QuestionModal from './questionModal';
 
 interface Question {
-  _id: string;  // Only use _id
+  _id: string;
   question: string;
   createdAt: Date;
   isAnswered: boolean;
   answers: string[];
   upvote: number;
   downvote: number;
+  imageUrl?: string;
 }
 
 export default function QuestionsPage() {
   const [submittedQuestions, setSubmittedQuestions] = useState<string[]>([]);
   const [otherUsersQuestions, setOtherUsersQuestions] = useState<Question[]>([]);
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
   const [votingInProgress, setVotingInProgress] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchAllQuestions = async () => {
       try {
-        // Fetch both regular questions and my questions
         const [questionsResponse, myQuestionsResponse] = await Promise.all([
           fetch('http://localhost:5000/api/questions'),
           fetch('http://localhost:5000/api/myQuestions')
@@ -37,7 +38,6 @@ export default function QuestionsPage() {
         ]);
 
         setOtherUsersQuestions(questionsData);
-        // Set the submitted questions from myQuestionsData
         setSubmittedQuestions(myQuestionsData.map((q: Question) => q.question));
       } catch (err) {
         console.error('Error in fetching questions', err);
@@ -49,106 +49,68 @@ export default function QuestionsPage() {
     fetchAllQuestions();
   }, []);
 
-  const handleQuestionSubmit = async (question: string) => {
+  const handleQuestionSubmit = async (question: string, image?: File) => {
     try {
       if (!question || question.trim().length === 0) {
         throw new Error('Question cannot be empty');
       }
 
-      console.log('Submitting question:', { question: question.trim() });
-
-      const response = await fetch('http://localhost:5000/api/questions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'omit',
-        body: JSON.stringify({ 
-          question: question.trim(),
-         }),
-      });
-
-      const myResponse = await fetch('http://localhost:5000/api/myQuestions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'omit',
-        body: JSON.stringify({
-          question: question.trim(),
-        }),
-      });
-
-      if (!myResponse.ok) {
-        const errorData = await myResponse.json();
-        console.error('Server error details:', errorData);
-        throw new Error(
-          `Server Error: ${errorData.message}\nDetails: ${errorData.error || 'No additional details'}`
-        );
+      const formData = new FormData();
+      formData.append('question', question.trim());
+      if (image) {
+        formData.append('image', image);
       }
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Server error details:', errorData);
-        throw new Error(
-          `Server Error: ${errorData.message}\nDetails: ${errorData.error || 'No additional details'}`
-        );
+      const [response, myResponse] = await Promise.all([
+        fetch('http://localhost:5000/api/questions', {
+          method: 'POST',
+          credentials: 'omit',
+          body: formData,
+        }),
+        fetch('http://localhost:5000/api/myQuestions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'omit',
+          body: JSON.stringify({ question: question.trim() }),
+        })
+      ]);
+
+      if (!response.ok || !myResponse.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData?.message || 'Failed to submit question');
       }
 
       const data = await response.json();
-      console.log('Received data from server:', data);
-
-      if (!data.question) {
-        console.error('Invalid data received:', data);
-        throw new Error('Invalid question data received from server');
-      }
-
       setOtherUsersQuestions((prev) => [...prev, data]);
       setSubmittedQuestions((prev) => [...prev, question]);
     } catch (err) {
       console.error('Detailed submission error:', err);
       throw new Error(err instanceof Error ? err.message : 'An unknown error occurred');
     }
-    
   };
 
   const handleUpvote = async (_id: string) => {
-    if (!_id) {
-      throw new Error('Question ID is required');
-    }
+    if (!_id) throw new Error('Question ID is required');
     
     setVotingInProgress(_id);
     try {
       const response = await fetch(`http://localhost:5000/api/questions/${_id}/vote`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'upvote' }),
         credentials: 'omit',
       });
   
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
-        console.error('Server response:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData
-        });
         throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
       }
       
       const updatedQuestion = await response.json();
-      console.log('Updated question:', updatedQuestion);
-      
       setOtherUsersQuestions((prev) =>
-        prev.map((q) => 
-          q._id === _id ? { 
-            ...q, 
-            ...updatedQuestion,
-            _id: updatedQuestion._id
-          } : q
-        )
+        prev.map((q) => q._id === _id ? { ...q, ...updatedQuestion } : q)
       );
     } catch (err) {
       console.error('Error in upvoting question', err);
@@ -156,45 +118,28 @@ export default function QuestionsPage() {
     } finally {
       setVotingInProgress('');
     }
-  }
+  };
   
   const handleDownvote = async (_id: string) => {
-    if (!_id) {
-      throw new Error('Question ID is required');
-    }
+    if (!_id) throw new Error('Question ID is required');
     
     setVotingInProgress(_id);
     try {
       const response = await fetch(`http://localhost:5000/api/questions/${_id}/vote`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'downvote' }),
         credentials: 'omit',
       });
   
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
-        console.error('Server response:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData
-        });
         throw new Error(errorData?.message || `HTTP error! status: ${response.status}`);
       }
   
       const updatedQuestion = await response.json();
-      console.log('Updated question:', updatedQuestion);
-      
       setOtherUsersQuestions((prev) =>
-        prev.map((q) => 
-          q._id === _id ? { 
-            ...q, 
-            ...updatedQuestion,
-            _id: updatedQuestion._id
-          } : q
-        )
+        prev.map((q) => q._id === _id ? { ...q, ...updatedQuestion } : q)
       );
     } catch (err) {
       console.error('Error in downvoting question', err);
@@ -202,10 +147,10 @@ export default function QuestionsPage() {
     } finally {
       setVotingInProgress('');
     }
-  }
+  };
 
   if (isLoading) {
-    return <div>Loading...</div>; 
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
   return (
@@ -214,7 +159,17 @@ export default function QuestionsPage() {
       <div className="flex-grow flex p-6 space-x-6">
         <div className="w-1/3 flex flex-col space-y-6">
           <div className="bg-white rounded-lg shadow-lg p-6">
-            <Question onQuestionSubmit={handleQuestionSubmit} />
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="w-full bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 transition duration-300"
+            >
+              Ask a Question
+            </button>
+            <QuestionModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onSubmit={handleQuestionSubmit}
+            />
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-6 space-y-4">
@@ -238,14 +193,25 @@ export default function QuestionsPage() {
           <div className="overflow-y-auto max-h-[calc(100vh-200px)]">
             {otherUsersQuestions.length > 0 ? (
               <ul className="space-y-4">
-                {otherUsersQuestions.map((q, index) => (
-                  <li key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                {otherUsersQuestions.map((q) => (
+                  <li key={q._id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="flex justify-between items-start mb-2">
                       <p className="text-gray-700 font-medium">{q.question}</p>
                       <span className="text-sm text-gray-500">
                         {new Date(q.createdAt).toLocaleDateString()}
                       </span>
                     </div>
+                    
+                    {q.imageUrl && (
+                      <div className="my-3">
+                        <img 
+                          src={`http://localhost:5000${q.imageUrl}`} 
+                          alt="Question illustration"
+                          className="max-w-full h-auto rounded-lg"
+                        />
+                      </div>
+                    )}
+                    
                     <div className="flex items-center space-x-4 text-sm">
                       <span className={`px-2 py-1 rounded ${
                         q.isAnswered ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
