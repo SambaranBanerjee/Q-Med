@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { FaSearch, FaKeyboard } from 'react-icons/fa';
 
 const NavBar = () => {
   const [profile, setUserData] = useState({ Name: "", Age: "", Weight: "", Height: "" });
@@ -40,6 +41,32 @@ const NavBar = () => {
           </a>
         </div>
 
+        <div className="flex space-x-9 items-center">
+          <div className="relative">
+            <div className="absolute right-5 top-1/2 -translate-y-1/2">
+              <FaSearch size={16} color="#9CA3AF" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search for a doctor..."
+              //value={searchTerm}
+              //onChange={handleSearch}
+              className="w-96 pl-10 pr-3 py-2.5 text-sm rounded-full border border-black
+                focus:border-gray-400 focus:ring-1 focus:ring-gray-300
+                transition-all duration-300 outline-none shadow-sm
+                hover:shadow-md placeholder-gray-400"
+            />
+          </div>
+          <button
+            id='postQuestion'
+            className='bg-purple-300 text-purple-600 px-6 py-2.5 rounded-full shadow-lg 
+            hover:shadow-xl transition-all duration-300
+            hover:bg-purple-400 font-medium flex items-center gap-2'
+          >
+            <FaKeyboard size={16} color="#4B5563" />
+            Post Question
+          </button>
+        </div>
         <div className="relative">
           <button
             id="profile"
