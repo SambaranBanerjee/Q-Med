@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { FaSearch, FaKeyboard } from 'react-icons/fa';
+import { FaSearch, FaKeyboard, FaMoon } from 'react-icons/fa';
 
 const NavBar = () => {
   const [profile, setUserData] = useState({ Name: "", Age: "", Weight: "", Height: "" });
   const [isProfileDropdownVisible, setProfileDropdownVisible] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('profile');
@@ -15,6 +16,11 @@ const NavBar = () => {
   const removeEmailFromLocalStorage = () => {
     localStorage.removeItem('EmailAddress');
     window.location.href = 'index.html'; 
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    document.documentElement.classList.toggle('dark');
   };
 
   return (
@@ -65,6 +71,18 @@ const NavBar = () => {
           >
             <FaKeyboard size={16} color="#4B5563" />
             Post Question
+          </button>
+        </div>
+        <div>
+          <button
+            id='darkMode'
+            className='bg-gray-300 text-gray-600 px-6 py-2.5 rounded-full shadow-lg 
+            hover:shadow-xl transition-all duration-300
+            hover:bg-gray-400 font-medium flex items-center gap-2'
+            onClick={toggleDarkMode}
+          >
+            <FaMoon size={16} color="#4B5563" />
+            Dark Mode
           </button>
         </div>
         <div className="relative">

@@ -10,6 +10,10 @@ const questionSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    author: {
+        type: String,
+        required: true
+    },
     createdAt: {
         type: Date,
         default: Date.now

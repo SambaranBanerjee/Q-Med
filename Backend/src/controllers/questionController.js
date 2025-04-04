@@ -43,7 +43,8 @@ export const getQuestions = async (req, res) => {
       isAnswered: question.isAnswered,
       answers: question.answers,
       upvote: question.upvote,
-      downvote: question.downvote
+      downvote: question.downvote,
+      author: question.author
     }));
 
     res.status(200).json(transformedQuestions);
@@ -66,6 +67,7 @@ export const createQuestion = async (req, res) => {
 
     const newQuestion = new Question({
       question: req.body.question,
+      author: req.body.author,
       ...(req.file && { image: req.file.path })
     });
 
@@ -82,7 +84,8 @@ export const createQuestion = async (req, res) => {
       isAnswered: savedQuestion.isAnswered,
       answers: savedQuestion.answers,
       upvote: savedQuestion.upvote,
-      downvote: savedQuestion.downvote
+      downvote: savedQuestion.downvote,
+      author: savedQuestion.author
     };
     
     res.status(201).json(response);

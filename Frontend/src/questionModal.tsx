@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 interface QuestionModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (question: string, image?: File) => Promise<void>;
+    onSubmit: (question: string, author: string, image?: File) => Promise<void>;
 }
 
 export default function QuestionModal({ isOpen, onClose, onSubmit }: QuestionModalProps) {
@@ -27,9 +27,8 @@ export default function QuestionModal({ isOpen, onClose, onSubmit }: QuestionMod
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        
         try {
-            await onSubmit(question, image || undefined);
+            await onSubmit(question, '', image || undefined);
             setQuestion('');
             setImage(null);
             setImagePreview(null);
