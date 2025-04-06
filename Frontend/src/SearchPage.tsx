@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Footer from './Footer';
 import NavBar from './Navbar';
+import { useTheme } from './ThemeContext';
 
 interface Doctor {
     id: number;
@@ -16,8 +17,9 @@ interface Doctor {
 export default function SearchPage() {
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>('');
-    const [isLoading, setIsLoading] = useState(true); // Add loading state
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { darkMode } = useTheme();
 
     useEffect(() => {
         const fetchDoctors = async () => {
@@ -60,14 +62,14 @@ export default function SearchPage() {
         doctor.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    if (isLoading) return <div>Loading doctors...</div>;
-    if (doctors.length === 0) return <div>No doctors found</div>;
+    if (isLoading) return <div className={darkMode ? "text-white" : "text-gray-800"}>Loading doctors...</div>;
+    if (doctors.length === 0) return <div className={darkMode ? "text-white" : "text-gray-800"}>No doctors found</div>;
 
     return (
-        <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 to-indigo-100'}`}>
           <NavBar />
           <div className="flex-grow container mx-auto px-4 py-8">
-            <h1 className="text-4xl font-bold text-indigo-800 mb-8 text-center">Book an Appointment</h1>
+            <h1 className={`text-4xl font-bold ${darkMode ? 'text-indigo-300' : 'text-indigo-800'} mb-8 text-center`}>Book an Appointment</h1>
             <div className="mb-8 max-w-2xl mx-auto">
               <div className="relative">
                 <input
@@ -75,13 +77,16 @@ export default function SearchPage() {
                   placeholder="Search for a doctor..."
                   value={searchTerm}
                   onChange={handleSearch}
-                  className="w-full px-6 py-4 text-lg rounded-full border-2 border-indigo-200 
-                    focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 
+                  className={`w-full px-6 py-4 text-lg rounded-full border-2 
+                    ${darkMode 
+                      ? 'bg-gray-800 border-indigo-800 text-white placeholder-indigo-200 focus:border-indigo-400' 
+                      : 'border-indigo-200 focus:border-indigo-500 placeholder-indigo-300'} 
+                    focus:ring-2 focus:ring-indigo-200 
                     transition-all duration-300 outline-none shadow-md 
-                    hover:shadow-lg placeholder-indigo-300"
+                    hover:shadow-lg`}
                 />
                 <svg 
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-indigo-400"
+                  className={`absolute right-4 top-1/2 transform -translate-y-1/2 h-6 w-6 ${darkMode ? 'text-indigo-300' : 'text-indigo-400'}`}
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
@@ -92,7 +97,7 @@ export default function SearchPage() {
             </div>
             {isLoading ? (
           <div className="text-center py-8">
-            <p className="text-gray-600">Loading doctors...</p>
+            <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Loading doctors...</p>
           </div>
         ) : error ? (
           <div className="text-center py-8">
@@ -104,23 +109,26 @@ export default function SearchPage() {
               filteredDoctors.map((doctor) => (
                 <div 
                   key={doctor.id} 
-                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl 
+                  className={`${darkMode 
+                    ? 'bg-gray-800 border-indigo-900 hover:shadow-indigo-700/20' 
+                    : 'bg-white border-indigo-50 hover:shadow-xl'} 
+                    rounded-lg shadow-md p-6 
                     transition-all duration-300 transform hover:-translate-y-1 
-                    border border-indigo-50"
+                    border`}
                 >
-                  <h2 className="text-xl font-semibold text-gray-800 mb-2">{doctor.name}</h2>
-                  <p className="text-gray-600 mb-2">Specialty: {doctor.specialty}</p>
-                  <p className="text-gray-600 mb-2">Location: {doctor.location}</p>
-                  <p className="text-gray-600 mb-2">Contact: {doctor.contactNumber}</p>
+                  <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'} mb-2`}>{doctor.name}</h2>
+                  <p className={darkMode ? 'text-gray-300 mb-2' : 'text-gray-600 mb-2'}>Specialty: {doctor.specialty}</p>
+                  <p className={darkMode ? 'text-gray-300 mb-2' : 'text-gray-600 mb-2'}>Location: {doctor.location}</p>
+                  <p className={darkMode ? 'text-gray-300 mb-2' : 'text-gray-600 mb-2'}>Contact: {doctor.contactNumber}</p>
                   <div className="flex items-center justify-between mt-4">
                     <span className={`px-3 py-1 rounded-full text-sm ${
                       doctor.availability 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
+                        ? (darkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800')
+                        : (darkMode ? 'bg-red-900 text-red-300' : 'bg-red-100 text-red-800')
                     }`}>
                       {doctor.availability ? 'Available' : 'Unavailable'}
                     </span>
-                    <span className="text-gray-600 text-sm">
+                    <span className={darkMode ? 'text-gray-400 text-sm' : 'text-gray-600 text-sm'}>
                       Patients: {doctor.customerCount}
                     </span>
                   </div>
@@ -128,7 +136,7 @@ export default function SearchPage() {
               ))
             ) : (
               <div className="col-span-full text-center py-8">
-                <p className="text-gray-600">
+                <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>
                   {doctors.length === 0 
                     ? "No doctors available at the moment" 
                     : "No doctors match your search criteria"}
@@ -141,4 +149,4 @@ export default function SearchPage() {
       <Footer />
     </div>
   );
-    }
+}

@@ -1,8 +1,11 @@
+import { useTheme } from './ThemeContext';
 import './index.css';
 
 export default function Footer() {
+    const { darkMode } = useTheme();
+
     return (
-        <footer className='bg-[#FF5E07] mt-auto py-6'>
+        <footer className={`${darkMode ? 'bg-gray-800' : 'bg-[#FF5E07]'} mt-auto py-6`}>
             <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
                 <div className='grid grid-cols-1 sm:grid-cols-3 gap-8'>
                     {/* Company Info */}
@@ -16,10 +19,10 @@ export default function Footer() {
                     <div className='text-white'>
                         <h3 className='text-xl font-bold mb-4'>Quick Links</h3>
                         <ul className='space-y-2'>
-                            <li><a href="#" className='hover:text-gray-200 transition-colors duration-200'>About Us</a></li>
-                            <li><a href="#" className='hover:text-gray-200 transition-colors duration-200'>Services</a></li>
-                            <li><a href="#" className='hover:text-gray-200 transition-colors duration-200'>Blog</a></li>
-                            <li><a href="#" className='hover:text-gray-200 transition-colors duration-200'>Contact</a></li>
+                            <li><a href="#" className={`${darkMode ? 'hover:text-indigo-300' : 'hover:text-gray-200'} transition-colors duration-200`}>About Us</a></li>
+                            <li><a href="#" className={`${darkMode ? 'hover:text-indigo-300' : 'hover:text-gray-200'} transition-colors duration-200`}>Services</a></li>
+                            <li><a href="#" className={`${darkMode ? 'hover:text-indigo-300' : 'hover:text-gray-200'} transition-colors duration-200`}>Blog</a></li>
+                            <li><a href="#" className={`${darkMode ? 'hover:text-indigo-300' : 'hover:text-gray-200'} transition-colors duration-200`}>Contact</a></li>
                         </ul>
                     </div>
 
@@ -31,16 +34,16 @@ export default function Footer() {
                             <p className='text-sm'>Phone: (+91) 839-4567</p>
                         </div>
                         <div className='flex space-x-4'>
-                            <a href="#" className='hover:text-gray-200 transition-colors duration-200'>
+                            <a href="#" className={`${darkMode ? 'hover:text-indigo-300' : 'hover:text-gray-200'} transition-colors duration-200`}>
                                 <i className='fab fa-facebook-f'></i>
                             </a>
-                            <a href="#" className='hover:text-gray-200 transition-colors duration-200'>
+                            <a href="#" className={`${darkMode ? 'hover:text-indigo-300' : 'hover:text-gray-200'} transition-colors duration-200`}>
                                 <i className='fab fa-twitter'></i>
                             </a>
-                            <a href="#" className='hover:text-gray-200 transition-colors duration-200'>
+                            <a href="#" className={`${darkMode ? 'hover:text-indigo-300' : 'hover:text-gray-200'} transition-colors duration-200`}>
                                 <i className='fab fa-linkedin-in'></i>
                             </a>
-                            <a href="#" className='hover:text-gray-200 transition-colors duration-200'>
+                            <a href="#" className={`${darkMode ? 'hover:text-indigo-300' : 'hover:text-gray-200'} transition-colors duration-200`}>
                                 <i className='fab fa-instagram'></i>
                             </a>
                         </div>

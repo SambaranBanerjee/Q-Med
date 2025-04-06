@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { FaSearch, FaKeyboard, FaMoon } from 'react-icons/fa';
+import { FaSearch, FaKeyboard, FaMoon, FaSun } from 'react-icons/fa';
+import { useTheme } from './ThemeContext';
 
 const NavBar = () => {
   const [profile, setUserData] = useState({ Name: "", Age: "", Weight: "", Height: "" });
   const [isProfileDropdownVisible, setProfileDropdownVisible] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const { darkMode, toggleDarkMode } = useTheme();
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('profile');
@@ -15,33 +16,28 @@ const NavBar = () => {
 
   const removeEmailFromLocalStorage = () => {
     localStorage.removeItem('EmailAddress');
-    window.location.href = 'index.html'; 
-  };
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle('dark');
+    window.location.href = '/'; 
   };
 
   return (
-    <nav className="sticky top-0 bg-white shadow-md z-50">
+    <nav className={`sticky top-0 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} shadow-md z-50`}>
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex space-x-6">
           <a
-            href="Entry.html"
-            className="text-gray-700 hover:text-red-500 transition-colors duration-200 font-medium"
+            href="#"
+            className={`${darkMode ? 'text-white hover:text-red-300' : 'text-gray-700 hover:text-red-500'} transition-colors duration-200 font-medium`}
           >
             Home
           </a>
           <a
-            href="Questions.html"
-            className="text-gray-700 hover:text-red-500 transition-colors duration-200 font-medium"
+            href="#"
+            className={`${darkMode ? 'text-white hover:text-red-300' : 'text-gray-700 hover:text-red-500'} transition-colors duration-200 font-medium`}
           >
             Ask Questions
           </a>
           <a
-            href="SearchPage.html"
-            className="text-gray-700 hover:text-red-500 transition-colors duration-200 font-medium"
+            href="#"
+            className={`${darkMode ? 'text-white hover:text-red-300' : 'text-gray-700 hover:text-red-500'} transition-colors duration-200 font-medium`}
           >
             Search Doctors
           </a>
@@ -50,45 +46,53 @@ const NavBar = () => {
         <div className="flex space-x-9 items-center">
           <div className="relative">
             <div className="absolute right-5 top-1/2 -translate-y-1/2">
-              <FaSearch size={16} color="#9CA3AF" />
+              <FaSearch size={16} color={darkMode ? "#ffffff" : "#9CA3AF"} />
             </div>
             <input
               type="text"
               placeholder="Search for a doctor..."
-              //value={searchTerm}
-              //onChange={handleSearch}
-              className="w-96 pl-10 pr-3 py-2.5 text-sm rounded-full border border-black
-                focus:border-gray-400 focus:ring-1 focus:ring-gray-300
+              className={`w-96 pl-10 pr-3 py-2.5 text-sm rounded-full border ${
+                darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-300' : 'border-black placeholder-gray-400'
+              } focus:border-gray-400 focus:ring-1 focus:ring-gray-300
                 transition-all duration-300 outline-none shadow-sm
-                hover:shadow-md placeholder-gray-400"
+                hover:shadow-md`}
             />
           </div>
           <button
             id='postQuestion'
-            className='bg-purple-300 text-purple-600 px-6 py-2.5 rounded-full shadow-lg 
+            className={`${
+              darkMode ? 'bg-purple-800 text-purple-200' : 'bg-purple-300 text-purple-600'
+            } px-6 py-2.5 rounded-full shadow-lg 
             hover:shadow-xl transition-all duration-300
-            hover:bg-purple-400 font-medium flex items-center gap-2'
+            hover:bg-purple-400 font-medium flex items-center gap-2`}
           >
-            <FaKeyboard size={16} color="#4B5563" />
+            <FaKeyboard size={16} color={darkMode ? "#E9D5FF" : "#4B5563"} />
             Post Question
           </button>
         </div>
         <div>
           <button
             id='darkMode'
-            className='bg-gray-300 text-gray-600 px-6 py-2.5 rounded-full shadow-lg 
+            className={`${
+              darkMode ? 'bg-yellow-500 text-yellow-900' : 'bg-gray-300 text-gray-600'
+            } px-6 py-2.5 rounded-full shadow-lg 
             hover:shadow-xl transition-all duration-300
-            hover:bg-gray-400 font-medium flex items-center gap-2'
+            hover:bg-gray-400 font-medium flex items-center gap-2`}
             onClick={toggleDarkMode}
           >
-            <FaMoon size={16} color="#4B5563" />
-            Dark Mode
+            {darkMode ? (
+              <><FaSun size={16} color="#78350F" />Light Mode</>
+            ) : (
+              <><FaMoon size={16} color="#4B5563" />Dark Mode</>
+            )}
           </button>
         </div>
         <div className="relative">
           <button
             id="profile"
-            className="flex items-center text-gray-700 hover:text-red-500 transition-colors duration-200 font-medium"
+            className={`flex items-center ${
+              darkMode ? 'text-white hover:text-red-300' : 'text-gray-700 hover:text-red-500'
+            } transition-colors duration-200 font-medium`}
             onClick={() => setProfileDropdownVisible(!isProfileDropdownVisible)}
           >
             Profile
@@ -111,12 +115,16 @@ const NavBar = () => {
           </button>
 
           {isProfileDropdownVisible && (
-            <div className="absolute mt-2 w-48 right-0 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+            <div className={`absolute mt-2 w-48 right-0 ${
+              darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            } rounded-lg shadow-lg border z-20`}>
               <ul className="py-2">
                 <li>
                   <a
-                    href="viewProfile.html"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                    href="#"
+                    className={`block px-4 py-2 ${
+                      darkMode ? 'text-white hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
+                    } transition-colors duration-200`}
                     id="LoginName"
                   >
                     {profile.Name}
@@ -124,7 +132,9 @@ const NavBar = () => {
                 </li>
                 <li>
                   <button
-                    className="block px-4 py-2 text-red-500 hover:bg-gray-100 w-full text-left transition-colors duration-200"
+                    className={`block px-4 py-2 ${
+                      darkMode ? 'text-red-400 hover:bg-gray-700' : 'text-red-500 hover:bg-gray-100'
+                    } w-full text-left transition-colors duration-200`}
                     onClick={removeEmailFromLocalStorage}
                   >
                     Logout
