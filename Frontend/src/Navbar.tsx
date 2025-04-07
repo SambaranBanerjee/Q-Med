@@ -1,46 +1,152 @@
 import { useEffect, useState } from 'react';
 import { FaSearch, FaKeyboard, FaMoon, FaSun } from 'react-icons/fa';
 import { useTheme } from './ThemeContext';
+import { useNavigate } from 'react-router-dom';
+import QuestionModal from './questionModal';
+
+interface Question {
+  _id: string;
+  author: string;
+  question: string;
+  createdAt: Date;
+  isAnswered: boolean;
+  answers: string[];
+  upvote: number;
+  downvote: number;
+  imageUrl?: string;
+}
+
+interface ProfileData {
+  Name: string;
+  Age: string;
+  Weight: string;
+  Height: string;
+}
 
 const NavBar = () => {
-  const [profile, setUserData] = useState({ Name: "", Age: "", Weight: "", Height: "" });
+  const [profile, setUserData] = useState<ProfileData>({ Name: "", Age: "", Weight: "", Height: "" });
   const [isProfileDropdownVisible, setProfileDropdownVisible] = useState(false);
   const { darkMode, toggleDarkMode } = useTheme();
+  const [submittedQuestions, setSubmittedQuestions] = useState<string[]>([]);
+  const [otherUsersQuestions, setOtherUsersQuestions] = useState<Question[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('profile');
     if (storedUserData) {
-      setUserData(JSON.parse(storedUserData));
+      try {
+        setUserData(JSON.parse(storedUserData));
+      } catch (err) {
+        console.error('Error parsing profile data', err);
+      }
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchAllQuestions = async () => {
+      try {
+        const [questionsResponse, myQuestionsResponse] = await Promise.all([
+          fetch('http://localhost:5000/api/questions'),
+          fetch('http://localhost:5000/api/myQuestions')
+        ]);
+
+        if (!questionsResponse.ok || !myQuestionsResponse.ok) {
+          throw new Error('Failed to fetch questions');
+        }
+
+        const [questionsData, myQuestionsData] = await Promise.all([
+          questionsResponse.json() as Promise<Question[]>,
+          myQuestionsResponse.json() as Promise<Question[]>
+        ]);
+
+        setOtherUsersQuestions(questionsData);
+        setSubmittedQuestions(myQuestionsData.map((q: Question) => q.question));
+      } catch (err) {
+        console.error('Error in fetching questions', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllQuestions();
   }, []);
 
   const removeEmailFromLocalStorage = () => {
     localStorage.removeItem('EmailAddress');
-    window.location.href = '/'; 
+    navigate('/'); 
   };
+
+  const handleQuestionSubmit = async (question: string, author: string, image?: File) => {
+    try {
+      if (!question || question.trim().length === 0) {
+        throw new Error('Question cannot be empty');
+      }
+
+      const formData = new FormData();
+      formData.append('question', question.trim());
+      formData.append('author', profile.Name);
+      if (image) {
+        formData.append('image', image);
+      }
+
+      const [response, myResponse] = await Promise.all([
+        fetch('http://localhost:5000/api/questions', {
+          method: 'POST',
+          credentials: 'omit',
+          body: formData,
+        }),
+        fetch('http://localhost:5000/api/myQuestions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'omit',
+          body: JSON.stringify({ question: question.trim(), author: profile.Name }),
+        })
+      ]);
+
+      if (!response.ok || !myResponse.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData?.message || 'Failed to submit question');
+      }
+
+      const data = await response.json() as Question;
+      setOtherUsersQuestions((prev) => [...prev, data]);
+      setSubmittedQuestions((prev) => [...prev, question]);
+    } catch (err) {
+      console.error('Detailed submission error:', err);
+      throw err;
+    }
+  };
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <nav className={`sticky top-0 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white'} shadow-md z-50`}>
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex space-x-6">
-          <a
-            href="#"
+          <button
+            onClick={() => navigate('/')}
             className={`${darkMode ? 'text-white hover:text-red-300' : 'text-gray-700 hover:text-red-500'} transition-colors duration-200 font-medium`}
           >
             Home
-          </a>
-          <a
-            href="#"
+          </button>
+          <button
+            onClick={() => navigate('/AskQuestions')}
             className={`${darkMode ? 'text-white hover:text-red-300' : 'text-gray-700 hover:text-red-500'} transition-colors duration-200 font-medium`}
           >
             Ask Questions
-          </a>
-          <a
-            href="#"
+          </button>
+          <button
+            onClick={() => navigate('/SearchPage')}
             className={`${darkMode ? 'text-white hover:text-red-300' : 'text-gray-700 hover:text-red-500'} transition-colors duration-200 font-medium`}
           >
             Search Doctors
-          </a>
+          </button>
         </div>
 
         <div className="flex space-x-9 items-center">
@@ -58,17 +164,25 @@ const NavBar = () => {
                 hover:shadow-md`}
             />
           </div>
-          <button
-            id='postQuestion'
-            className={`${
-              darkMode ? 'bg-purple-800 text-purple-200' : 'bg-purple-300 text-purple-600'
-            } px-6 py-2.5 rounded-full shadow-lg 
-            hover:shadow-xl transition-all duration-300
-            hover:bg-purple-400 font-medium flex items-center gap-2`}
-          >
-            <FaKeyboard size={16} color={darkMode ? "#E9D5FF" : "#4B5563"} />
-            Post Question
-          </button>
+          <div>
+              <button
+              id='postQuestion'
+              className={`${
+                darkMode ? 'bg-purple-800 text-purple-200' : 'bg-purple-300 text-purple-600'
+              } px-6 py-2.5 rounded-full shadow-lg 
+              hover:shadow-xl transition-all duration-300
+              hover:bg-purple-400 font-medium flex items-center gap-2`}
+              onClick={() => setIsModalOpen(true)}
+            >
+              <FaKeyboard size={16} color={darkMode ? "#E9D5FF" : "#4B5563"} />
+              Post Question
+            </button>
+            <QuestionModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onSubmit={handleQuestionSubmit}
+            />
+          </div>
         </div>
         <div>
           <button
@@ -120,21 +234,20 @@ const NavBar = () => {
             } rounded-lg shadow-lg border z-20`}>
               <ul className="py-2">
                 <li>
-                  <a
-                    href="#"
-                    className={`block px-4 py-2 ${
+                  <button
+                    className={`block px-4 py-2 w-full text-left ${
                       darkMode ? 'text-white hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'
                     } transition-colors duration-200`}
                     id="LoginName"
                   >
                     {profile.Name}
-                  </a>
+                  </button>
                 </li>
                 <li>
                   <button
-                    className={`block px-4 py-2 ${
+                    className={`block px-4 py-2 w-full text-left ${
                       darkMode ? 'text-red-400 hover:bg-gray-700' : 'text-red-500 hover:bg-gray-100'
-                    } w-full text-left transition-colors duration-200`}
+                    } transition-colors duration-200`}
                     onClick={removeEmailFromLocalStorage}
                   >
                     Logout
