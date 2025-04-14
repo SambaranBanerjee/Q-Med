@@ -1,0 +1,35 @@
+/* Layout.css - For shared layout styles only */
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.layout-content {
+  flex: 1;
+}
+
+/* Dark mode styles - now scoped to layout only */
+.layout-container.dark {
+  background-color: #111827;
+  color: #fff;
+}
+
+.layout-container.dark .nav-link {
+  color: #fff;
+}
+
+/* Scrollbar styles - now component-specific */
+.layout-scrollable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.layout-scrollable::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.layout-scrollable::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}

@@ -1,4 +1,4 @@
-import NavBar from './Navbar';
+//import NavBar from './Navbar';
 import { useState, useEffect } from 'react';
 import QuestionModal from './questionModal';
 import { FaReply } from 'react-icons/fa';
@@ -178,7 +178,6 @@ export default function QuestionsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-red-400 to-orange-300">
       <style>{scrollbarHideStyles}</style>
-      <NavBar />
       <div className="flex-grow flex p-6 space-x-6">
         <div className="w-1/3 flex flex-col space-y-6">
           <div className="bg-white rounded-lg shadow-lg p-6">

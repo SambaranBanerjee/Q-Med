@@ -27,8 +27,8 @@ const NavBar = () => {
   const [profile, setUserData] = useState<ProfileData>({ Name: "", Age: "", Weight: "", Height: "" });
   const [isProfileDropdownVisible, setProfileDropdownVisible] = useState(false);
   const { darkMode, toggleDarkMode } = useTheme();
-  const [submittedQuestions, setSubmittedQuestions] = useState<string[]>([]);
-  const [otherUsersQuestions, setOtherUsersQuestions] = useState<Question[]>([]);
+  const [, setSubmittedQuestions] = useState<string[]>([]);
+  const [, setOtherUsersQuestions] = useState<Question[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -78,7 +78,7 @@ const NavBar = () => {
     navigate('/'); 
   };
 
-  const handleQuestionSubmit = async (question: string, author: string, image?: File) => {
+  const handleQuestionSubmit = async (question: string, _author: string, image?: File) => {
     try {
       if (!question || question.trim().length === 0) {
         throw new Error('Question cannot be empty');
@@ -130,19 +130,19 @@ const NavBar = () => {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex space-x-6">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/app')}
             className={`${darkMode ? 'text-white hover:text-red-300' : 'text-gray-700 hover:text-red-500'} transition-colors duration-200 font-medium`}
           >
             Home
           </button>
           <button
-            onClick={() => navigate('/AskQuestions')}
+            onClick={() => navigate('/app/questions')}
             className={`${darkMode ? 'text-white hover:text-red-300' : 'text-gray-700 hover:text-red-500'} transition-colors duration-200 font-medium`}
           >
             Ask Questions
           </button>
           <button
-            onClick={() => navigate('/SearchPage')}
+            onClick={() => navigate('/app/search')}
             className={`${darkMode ? 'text-white hover:text-red-300' : 'text-gray-700 hover:text-red-500'} transition-colors duration-200 font-medium`}
           >
             Search Doctors

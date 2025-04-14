@@ -1,65 +1,49 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import SearchPage from './SearchPage';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './ThemeContext';
+import { AuthProvider } from './AuthContext';
 import './index.css';
-import welcome from './assets/welcome.jpg';
-import EntryPage from './App2'; // Import EntryPage from App2
 
-// Welcome page component
-function WelcomePage() {
-  const styles = {
-    backgroundImage: `url(${welcome})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    height: '100vh',
-    width: '100vw',
-  };
-
-  const navigateTo = (path: string) => {
-    window.location.href = path;
-  };
-
-  return (
-    <div className='flex flex-col justify-center items-center z-10' style={styles}>
-      <h1 className='text-7xl text-white'>Welcome to Q-Med</h1>
-      <p className='mt-7 text-white text-xl'>This is your one stop guide to a healthy and better life.</p>
-      <div className='mt-8'>
-        <button 
-          className="mr-4 px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          onClick={() => navigateTo('Login.html')}
-        >
-          Login
-        </button>
-        <button 
-          className="px-6 py-3 border-2 border-white bg-transparent text-white rounded hover:bg-white hover:text-blue-500 transition-colors"
-          onClick={() => navigateTo('Signup.html')}
-        >
-          Sign up
-        </button>
-      </div>
-    </div>
-  );
-}
+// Components
+import WelcomePage from './Welcome';
+import Dashboard from './Dashboard';
+import SearchPage from './SearchPage';
+import QuestionsPage from './AskQuestions';
+import LoginComponent from './Login';
+import SignupComponent from './Signup';
+import Profiles from './Profile';
+import UserInfo from './viewProfile';
+import PrivateLayout from './PrivateLayout';
+import PublicLayout from './PublicLayout';
 
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <Routes>
-          {/* Welcome page at root */}
-          <Route path="/" element={<WelcomePage />} />
-          
-          {/* Use EntryPage from App2.tsx */}
-          <Route path="/app" element={<EntryPage />} />
-          
-          {/* Other routes */}
-          <Route path="/search" element={
-            <div className="flex flex-col min-h-screen">
-              <SearchPage />
-            </div>
-          } />
-        </Routes>
-      </Router>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            
+            {/* Public Routes - No Layout */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<WelcomePage />} />
+              <Route path="/login" element={<LoginComponent />} />
+              <Route path="/signup" element={<SignupComponent />} />
+            </Route>
+
+            {/* Private Routes - With Layout */}
+            <Route element={<PrivateLayout />}>
+              <Route path="/app" element={<Dashboard />} />
+              <Route path="/app/search" element={<SearchPage />} />
+              <Route path="/app/questions" element={<QuestionsPage />} />
+              <Route path="/app/view-profile" element={<UserInfo />} />
+              <Route path="/profile-setup" element={<Profiles />} />
+            </Route>
+
+            {/* Redirects */}
+            <Route path="/entry" element={<Navigate to="/app" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

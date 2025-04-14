@@ -1,10 +1,4 @@
-/* In your CSS file */
-#r6 {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  
+
   .search-page {
     flex: 1;
     display: flex;

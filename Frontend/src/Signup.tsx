@@ -1,25 +1,25 @@
-/* eslint-disable react-refresh/only-export-components */
-// eslint-disable-next-line react-refresh/only-export-components
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const EmailAddress: string[] = JSON.parse(localStorage.getItem('EmailAddress') || '[]');
 export const Password: string[] = JSON.parse(localStorage.getItem('Password') || '[]');
 
 function Signup(event: React.FormEvent){
+    const navigate = useNavigate();
     event.preventDefault();
 
     const E1 = (document.getElementById('Email') as HTMLInputElement).value;
     const P1 = (document.getElementById('Password') as HTMLInputElement).value;
 
     if(EmailAddress.includes(E1) && Password.includes(P1) && (E1 !== "" && P1 !== "")){
-        window.location.href = 'Profile.html';
+        navigate('/profile-setup');
     }
     else if(!EmailAddress.includes(E1) && !Password.includes(P1)){
         EmailAddress.push(E1);
         Password.push(P1);
         localStorage.setItem('EmailAddress', JSON.stringify(EmailAddress));
         localStorage.setItem('Password', JSON.stringify(Password));
-        window.location.href = 'Profile.html';
+        navigate('/profile-setup');
     }
     else if(!EmailAddress.includes(E1) && Password.includes(P1)){
         EmailAddress.push(E1);

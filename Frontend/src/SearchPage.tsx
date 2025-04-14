@@ -1,8 +1,7 @@
 //SearchPage.tsx
 import React, { useState, useEffect } from 'react';
-import Footer from './Footer';
-import NavBar from './Navbar';
 import { useTheme } from './ThemeContext';
+import '../SearchPage.css';
 
 interface Doctor {
     id: number;
@@ -67,7 +66,6 @@ export default function SearchPage() {
 
     return (
         <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-blue-50 to-indigo-100'}`}>
-          <NavBar />
           <div className="flex-grow container mx-auto px-4 py-8">
             <h1 className={`text-4xl font-bold ${darkMode ? 'text-indigo-300' : 'text-indigo-800'} mb-8 text-center`}>Book an Appointment</h1>
             <div className="mb-8 max-w-2xl mx-auto">
@@ -146,7 +144,6 @@ export default function SearchPage() {
           </div>
         )}
       </div>
-      <Footer />
     </div>
   );
 }
