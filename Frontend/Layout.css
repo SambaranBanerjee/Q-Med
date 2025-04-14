@@ -7,6 +7,16 @@
 
 .layout-content {
   flex: 1;
+  width: 100%;
+}
+
+/* Auth pages specific layout */
+.auth-layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
 }
 
 /* Dark mode styles - now scoped to layout only */
