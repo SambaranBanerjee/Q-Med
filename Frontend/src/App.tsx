@@ -14,6 +14,7 @@ import Profiles from './Profile';
 import UserInfo from './viewProfile';
 import PrivateLayout from './PrivateLayout';
 import PublicLayout from './PublicLayout';
+import MyQuestionsPage from './MyQuestionsPage';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
               <Route path="/app/questions" element={<QuestionsPage />} />
               <Route path="/app/view-profile" element={<UserInfo />} />
               <Route path="/profile-setup" element={<Profiles />} />
+              <Route path="/my-questions" element={<MyQuestionsPage />} />
             </Route>
 
             {/* Redirects */}

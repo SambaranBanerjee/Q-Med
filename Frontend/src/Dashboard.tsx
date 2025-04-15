@@ -1,6 +1,7 @@
 import { FaHeartbeat, FaUserMd, FaPills, FaCalendarAlt, FaQuestionCircle } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 import { useTheme } from './ThemeContext';
+import { useNavigate } from 'react-router-dom';
 
 interface Doctor {
     id: number;
@@ -14,19 +15,29 @@ interface Doctor {
 
 function Dashboard() {
     const [submittedQuestions, setSubmittedQuestions] = useState<string[]>([]);
+    const [displayCount] = useState(2);
+    const [allSubmittedQuestions, setAllSubmittedQuestions] = useState<string[]>([]);
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { darkMode } = useTheme();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchSubmittedQuestions = async () => {
             const response = await fetch('http://localhost:5000/api/myQuestions');
             const data = await response.json();
-            setSubmittedQuestions(data.map((q: { question: string }) => q.question));
+            const questions = data.map((q: { question: string }) => q.question);
+            setAllSubmittedQuestions(questions);
+            setSubmittedQuestions(questions.slice(0, displayCount));
         };
         fetchSubmittedQuestions();
-    }, []);
+    }, [displayCount]);
+
+    const handleSeeMore = () => {
+        navigate('/my-questions', { state: { questions: allSubmittedQuestions } });
+    };
+
     useEffect(() => {
         const fetchDoctors = async () => {
             try {
@@ -139,18 +150,28 @@ function Dashboard() {
                     {/* Questions Section */}
                     <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} rounded-lg shadow-sm p-6 border`}>
                         <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'} mb-6 flex items-center gap-2`}>
-                            <FaQuestionCircle size={20} color={darkMode ? "#93c5fd" : "#2563eb"} />
-                            Your Questions
-                        </h2>
-                        <div className='space-y-4'>
+                                <FaQuestionCircle size={20} color={darkMode ? "#93c5fd" : "#2563eb"} />
+                                Your Questions
+                            </h2>
+                    <div className='space-y-4'>
                             {submittedQuestions.length > 0 ? (
-                                <ul className="space-y-3">
-                                    {submittedQuestions.map((q, index) => (
-                                    <li key={index} className={`p-3 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} rounded-lg border`}>
-                                        <p className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{q}</p>
-                                    </li>
-                                    ))}
-                                </ul>
+                                <>
+                                    <ul className="space-y-3">
+                                        {submittedQuestions.map((q, index) => (
+                                            <li key={index} className={`p-3 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} rounded-lg border`}>
+                                                <p className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{q}</p>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    {allSubmittedQuestions.length > displayCount && (
+                                        <button 
+                                            onClick={handleSeeMore}
+                                            className={`w-full text-center py-2 rounded-lg font-medium ${darkMode ? 'bg-gray-600 hover:bg-gray-500 text-gray-200' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
+                                        >
+                                            See More Questions
+                                        </button>
+                                    )}
+                                </>
                             ) : (
                                 <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>No questions submitted yet.</p>
                             )}

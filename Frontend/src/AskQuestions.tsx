@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import QuestionModal from './questionModal';
 import { FaReply } from 'react-icons/fa';
+import { useTheme } from './ThemeContext';
 
 // Add styles for hiding scrollbar
 const scrollbarHideStyles = `
@@ -33,6 +34,7 @@ export default function QuestionsPage() {
   const [votingInProgress, setVotingInProgress] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [profile, setUserData] = useState({ Name: "", Age: "", Weight: "", Height: "" });
+  const { darkMode } = useTheme();
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('profile');
@@ -175,118 +177,200 @@ export default function QuestionsPage() {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
-  return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-red-400 to-orange-300">
-      <style>{scrollbarHideStyles}</style>
-      <div className="flex-grow flex p-6 space-x-6">
-        <div className="w-1/3 flex flex-col space-y-6">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="w-full bg-red-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-red-600 transition duration-300"
-            >
-              Ask a Question
-            </button>
-            <QuestionModal
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
-              onSubmit={handleQuestionSubmit}
-            />
-          </div>
-
-          <div className="bg-white rounded-lg shadow-lg p-6 space-y-4">
-            <h2 className="text-xl font-bold text-gray-800">Your Submitted Questions</h2>
-            {submittedQuestions.length > 0 ? (
-              <ul className="space-y-3">
-                {submittedQuestions.map((q, index) => (
-                  <li key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-gray-700">{q}</p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500">No questions submitted yet.</p>
-            )}
-          </div>
+  // Updated return statement with complete dark mode implementation
+return (
+  <div className={`flex flex-col min-h-screen transition-colors duration-300 ${
+    !darkMode 
+      ? "bg-gradient-to-br from-red-400 to-orange-300" 
+      : "dark bg-gradient-to-br from-gray-900 to-gray-800"
+  }`}>
+    <style>{scrollbarHideStyles}</style>
+    <div className={`flex-grow flex p-6 space-x-6 ${
+      darkMode ? "dark:text-gray-100" : ""
+    }`}>
+      {/* Left Column */}
+      <div className="w-1/3 flex flex-col space-y-6">
+        {/* Ask Question Card */}
+        <div className={`rounded-lg shadow-lg p-6 transition-colors duration-300 ${
+          darkMode 
+            ? "dark:bg-gray-800 dark:shadow-gray-900" 
+            : "bg-white"
+        }`}>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className={`w-full py-2 px-4 rounded-lg font-semibold transition duration-300 ${
+              darkMode
+                ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+                : "bg-red-500 hover:bg-red-600 text-white"
+            }`}
+          >
+            Ask a Question
+          </button>
+          <QuestionModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={handleQuestionSubmit}
+          />
         </div>
 
-        <div className="w-2/3 space-y-6">
-          <h2 className="text-xl font-bold text-gray-800">Questions</h2>
-          <div className="overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-hide">
-            {otherUsersQuestions.length > 0 ? (
-              <ul className="space-y-6">
-                {otherUsersQuestions.map((q) => (
-                  <li key={q._id} className="bg-white rounded-lg shadow-lg p-6">
-                    <div className="flex flex-col space-y-3">
-                      <div className="flex justify-between items-start">
-                        <p className="text-gray-700 font-medium">{q.author}</p>
-                        <span className="text-sm text-gray-500">
-                          {new Date(q.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <p className="text-gray-700 text-lg">{q.question}</p>
-                      
-                      {q.imageUrl && (
-                        <div className="my-2">
-                          <img 
-                            src={`http://localhost:5000${q.imageUrl}`} 
-                            alt="Question illustration"
-                            className="max-w-full h-auto rounded-lg"
-                          />
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center space-x-4 text-sm">
-                        <span className={`px-2 py-1 rounded ${
-                          q.isAnswered ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                        }`}>
-                          {q.isAnswered ? 'Answered' : 'Pending'}
-                        </span>
-                        <div className="flex items-center space-x-2">
-                          <button 
-                            onClick={() => handleUpvote(q._id)}
-                            disabled={votingInProgress === q._id}
-                            className={`text-green-600 ${votingInProgress === q._id ? 'opacity-50' : 'hover:text-green-800'}`}
-                          >
-                            ↑ {q.upvote}
-                          </button>
-                          <button 
-                            onClick={() => handleDownvote(q._id)}
-                            disabled={votingInProgress === q._id}
-                            className={`text-red-600 ${votingInProgress === q._id ? 'opacity-50' : 'hover:text-red-800'}`}
-                          >
-                            ↓ {q.downvote}
-                          </button>
-                          <button
-                            className="text-blue-600 hover:text-blue-800 flex items-center space-x-2"
-                          >
-                            <FaReply />
-                            Answer
-                          </button>
-                        </div>
-                      </div>
-                      {q.answers.length > 0 && (
-                        <div className="mt-3">
-                          <p className="text-sm font-medium text-gray-700">Answers:</p>
-                          <ul className="mt-1 space-y-1">
-                            {q.answers.map((answer, idx) => (
-                              <li key={idx} className="text-sm text-gray-600 pl-3 border-l-2 border-gray-300">
-                                {answer}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+        {/* Your Questions Card */}
+        <div className={`rounded-lg shadow-lg p-6 space-y-4 transition-colors duration-300 ${
+          darkMode 
+            ? "dark:bg-gray-800 dark:shadow-gray-900" 
+            : "bg-white"
+        }`}>
+          <h2 className={`text-xl font-bold ${
+            darkMode ? "dark:text-gray-200" : "text-gray-800"
+          }`}>
+            Your Submitted Questions
+          </h2>
+          {submittedQuestions.length > 0 ? (
+            <ul className="space-y-3">
+              {submittedQuestions.map((q, index) => (
+                <li key={index} className={`p-3 rounded-lg border transition-colors duration-300 ${
+                  darkMode
+                    ? "dark:bg-gray-700 dark:border-gray-600"
+                    : "bg-gray-50 border-gray-200"
+                }`}>
+                  <p className={darkMode ? "dark:text-gray-300" : "text-gray-700"}>{q}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={darkMode ? "dark:text-gray-400" : "text-gray-500"}>
+              No questions submitted yet.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Right Column - Questions List */}
+      <div className="w-2/3 space-y-6">
+        <h2 className={`text-xl font-bold ${
+          darkMode ? "dark:text-gray-200" : "text-gray-800"
+        }`}>
+          Questions
+        </h2>
+        <div className="overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-hide">
+          {otherUsersQuestions.length > 0 ? (
+            <ul className="space-y-6">
+              {otherUsersQuestions.map((q) => (
+                <li key={q._id} className={`rounded-lg shadow-lg p-6 transition-colors duration-300 ${
+                  darkMode 
+                    ? "dark:bg-gray-800 dark:shadow-gray-900" 
+                    : "bg-white"
+                }`}>
+                  <div className="flex flex-col space-y-3">
+                    <div className="flex justify-between items-start">
+                      <p className={`font-medium ${
+                        darkMode ? "dark:text-gray-300" : "text-gray-700"
+                      }`}>
+                        {q.author}
+                      </p>
+                      <span className={`text-sm ${
+                        darkMode ? "dark:text-gray-400" : "text-gray-500"
+                      }`}>
+                        {new Date(q.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500">No questions from users yet.</p>
-            )}
-          </div>
+                    <p className={`text-lg ${
+                      darkMode ? "dark:text-gray-200" : "text-gray-700"
+                    }`}>
+                      {q.question}
+                    </p>
+                    
+                    {q.imageUrl && (
+                      <div className="my-2">
+                        <img 
+                          src={`http://localhost:5000${q.imageUrl}`} 
+                          alt="Question illustration"
+                          className="max-w-full h-auto rounded-lg"
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center space-x-4 text-sm">
+                      <span className={`px-2 py-1 rounded ${
+                        q.isAnswered 
+                          ? darkMode 
+                            ? "dark:bg-green-900 dark:text-green-300" 
+                            : "bg-green-100 text-green-700"
+                          : darkMode 
+                            ? "dark:bg-yellow-900 dark:text-yellow-300" 
+                            : "bg-yellow-100 text-yellow-700"
+                      }`}>
+                        {q.isAnswered ? 'Answered' : 'Pending'}
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        <button 
+                          onClick={() => handleUpvote(q._id)}
+                          disabled={votingInProgress === q._id}
+                          className={`${votingInProgress === q._id ? 'opacity-50' : ''} ${
+                            darkMode 
+                              ? "dark:text-green-400 dark:hover:text-green-300" 
+                              : "text-green-600 hover:text-green-800"
+                          }`}
+                        >
+                          ↑ {q.upvote}
+                        </button>
+                        <button 
+                          onClick={() => handleDownvote(q._id)}
+                          disabled={votingInProgress === q._id}
+                          className={`${votingInProgress === q._id ? 'opacity-50' : ''} ${
+                            darkMode 
+                              ? "dark:text-red-400 dark:hover:text-red-300" 
+                              : "text-red-600 hover:text-red-800"
+                          }`}
+                        >
+                          ↓ {q.downvote}
+                        </button>
+                        <button
+                          className={`flex items-center space-x-2 ${
+                            darkMode
+                              ? "dark:text-blue-400 dark:hover:text-blue-300"
+                              : "text-blue-600 hover:text-blue-800"
+                          }`}
+                        >
+                          <FaReply />
+                          Answer
+                        </button>
+                      </div>
+                    </div>
+                    {q.answers.length > 0 && (
+                      <div className="mt-3">
+                        <p className={`text-sm font-medium ${
+                          darkMode ? "dark:text-gray-300" : "text-gray-700"
+                        }`}>
+                          Answers:
+                        </p>
+                        <ul className="mt-1 space-y-1">
+                          {q.answers.map((answer, idx) => (
+                            <li 
+                              key={idx} 
+                              className={`text-sm pl-3 border-l-2 ${
+                                darkMode
+                                  ? "dark:text-gray-400 dark:border-gray-600"
+                                  : "text-gray-600 border-gray-300"
+                              }`}
+                            >
+                              {answer}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={darkMode ? "dark:text-gray-400" : "text-gray-500"}>
+              No questions from users yet.
+            </p>
+          )}
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
